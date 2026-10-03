@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>College IV Travel Planner</title>
+  <meta name="description" content="Plan your College Industrial Visit easily – manage students, routes, transport, hotels and budget all in one place." />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ====== SIDEBAR ====== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="fas fa-graduation-cap"></i>
+        <span>IV Planner</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a href="#" class="nav-item" data-page="students">
+        <i class="fas fa-users"></i> Students
+      </a>
+      <a href="#" class="nav-item" data-page="places">
+        <i class="fas fa-map-marked-alt"></i> Place & Route
+      </a>
+      <a href="#" class="nav-item" data-page="transport">
+        <i class="fas fa-bus"></i> Transport & Hotel
+      </a>
+      <a href="#" class="nav-item" data-page="budget">
+        <i class="fas fa-wallet"></i> Budget & Schedule
+      </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <span><i class="fas fa-circle" style="color:#22c55e;font-size:8px;"></i> College IV Planner v1.1</span>
+    </div>
+  </aside>
+
+  <!-- ====== OVERLAY ====== -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ====== MAIN CONTENT ====== -->
+  <main class="main-content" id="mainContent">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+      <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      <div class="topbar-right">
+        <span class="date-badge"><i class="fas fa-calendar-alt"></i> <span id="currentDate"></span></span>
+      </div>
+    </header>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===================== DASHBOARD PAGE ===================== -->
+    <section class="page active" id="page-dashboard">
+      <div class="section-header">
+        <h2>Industrial Visit Overview</h2>
+        <p>All key information about your IV at a glance.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <span class="stat-number" id="dash-total-students">0</span>
+            <span class="stat-label">Total Students</span>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="fas fa-map-pin"></i></div>
+          <div class="stat-info">
+            <span class="stat-number" id="dash-total-places">0</span>
+            <span class="stat-label">Places to Visit</span>
+          </div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+          <div class="stat-info">
+            <span class="stat-number" id="dash-total-budget">₹0</span>
+            <span class="stat-label">Total IV Budget</span>
+          </div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon"><i class="fas fa-user-tag"></i></div>
+          <div class="stat-info">
+            <span class="stat-number" id="dash-cost-per-student">₹0</span>
+            <span class="stat-label">Cost Per Student</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Route Summary -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-route"></i> Route Summary</h3>
+          </div>
+          <div class="card-body" id="dash-route-summary">
+            <p class="empty-msg">No route added yet. Go to <strong>Place &amp; Route</strong> module.</p>
+          </div>
+        </div>
+
+        <!-- Transport Summary -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-bus"></i> Transport Details</h3>
+          </div>
+          <div class="card-body" id="dash-transport-summary">
+            <p class="empty-msg">No transport details added yet.</p>
+          </div>
+        </div>
+
+        <!-- Hotel Summary -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-hotel"></i> Hotel Details</h3>
+          </div>
+          <div class="card-body" id="dash-hotel-summary">
+            <p class="empty-msg">No hotel details added yet.</p>
+          </div>
+        </div>
+
+        <!-- Budget Summary -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-chart-pie"></i> Budget Summary</h3>
+          </div>
+          <div class="card-body" id="dash-budget-summary">
+            <p class="empty-msg">No budget details added yet.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Preview -->
+      <div class="card mt-16">
+        <div class="card-header">
+          <h3><i class="fas fa-calendar-check"></i> Complete IV Schedule</h3>
+        </div>
+        <div class="card-body" id="dash-schedule-summary">
+          <p class="empty-msg">No schedule added yet. Go to <strong>Budget &amp; Schedule</strong> module.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STUDENTS PAGE ===================== -->
+    <section class="page" id="page-students">
+      <div class="section-header">
+        <h2><i class="fas fa-users"></i> Student Management</h2>
+        <p>Add, view, edit and delete student information.</p>
+      </div>
+
+      <!-- Student Form -->
+      <div class="card">
+        <div class="card-header">
+          <h3 id="student-form-title"><i class="fas fa-user-plus"></i> Add New Student</h3>
+        </div>
+        <div class="card-body">
+          <form id="studentForm" novalidate>
+            <input type="hidden" id="studentEditId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="studentName">Student Name <span class="required">*</span></label>
+                <input type="text" id="studentName" placeholder="e.g. Aravind Kumar" maxlength="60" />
+                <span class="field-error" id="err-studentName"></span>
+              </div>
+              <div class="form-group">
+                <label for="regNumber">Register Number <span class="required">*</span></label>
+                <input type="text" id="regNumber" placeholder="e.g. 22CS001" maxlength="20" />
+                <span class="field-error" id="err-regNumber"></span>
+              </div>
+              <div class="form-group">
+                <label for="department">Department <span class="required">*</span></label>
+                <select id="department">
+                  <option value="">-- Select Department --</option>
+                  <option>Computer Science</option>
+                  <option>Information Technology</option>
+                  <option>Electronics &amp; Communication</option>
+                  <option>Electrical Engineering</option>
+                  <option>Mechanical Engineering</option>
+                  <option>Civil Engineering</option>
+                  <option>Business Administration</option>
+                  <option>Other</option>
+                </select>
+                <span class="field-error" id="err-department"></span>
+              </div>
+              <div class="form-group">
+                <label for="year">Year <span class="required">*</span></label>
+                <select id="year">
+                  <option value="">-- Select Year --</option>
+                  <option>1st Year</option>
+                  <option>2nd Year</option>
+                  <option>3rd Year</option>
+                  <option>4th Year</option>
+                </select>
+                <span class="field-error" id="err-year"></span>
+              </div>
+              <div class="form-group">
+                <label for="phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phone" placeholder="e.g. 9876543210" maxlength="10" />
+                <span class="field-error" id="err-phone"></span>
+              </div>
+            </div>
+
+            <!-- ── Inline Document Upload ── -->
+            <div class="inline-upload-box" id="stuInlineUploadBox">
+              <div class="inline-upload-header">
+                <i class="fas fa-paperclip"></i>
+                <span>Attach Student Documents</span>
+                <span class="inline-upload-hint">PDF, JPG, JPEG, PNG &middot; Max 5 MB each</span>
+              </div>
+              <div class="inline-upload-row" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <label for="studentFileInput" class="btn-upload-inline">
+                    <i class="fas fa-cloud-upload-alt"></i> Upload Document / Name List
+                  </label>
+                  <input type="file" id="studentFileInput" accept=".pdf,.jpg,.jpeg,.png,.txt,.csv" multiple hidden />
+                  <span class="inline-upload-or">or drag &amp; drop</span>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnOpenNameListModal" style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:99px; background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; font-weight:700;">
+                  <i class="fas fa-users-rectangle" style="color:#2563eb;"></i> Upload / Import Name List
+                </button>
+              </div>
+              <div id="studentUploadErr" class="inline-upload-err" style="display:none;"></div>
+              <div id="studentFileChips" class="inline-file-chips"></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="studentSubmitBtn">
+                <i class="fas fa-plus"></i> Add Student
+              </button>
+              <button type="button" class="btn btn-secondary" id="studentCancelBtn" style="display:none;">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Student List -->
+      <div class="card mt-16">
+        <div class="card-header flex-between">
+          <h3><i class="fas fa-list"></i> Student List &nbsp;<span class="badge" id="studentCount">0</span></h3>
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="studentSearch" placeholder="Search students..." />
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="data-table" id="studentTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Reg. No</th>
+                  <th>Department</th>
+                  <th>Year</th>
+                  <th>Phone</th>
+                  <th>Uploaded Document</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <tr><td colspan="8" class="empty-row">No students added yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PLACE & ROUTE PAGE ===================== -->
+    <section class="page" id="page-places">
+      <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2><i class="fas fa-map-marked-alt"></i> Place &amp; Route Planning</h2>
+          <p>Plan your IV route with companies and tourist spots.</p>
+        </div>
+        <a href="place-route-module/index.html" class="btn btn-secondary" target="_blank" style="margin-left:auto; display:inline-flex; align-items:center; gap:8px;">
+          <i class="fas fa-arrow-up-right-from-square"></i> Open Standalone Module
+        </a>
+      </div>
+
+      <!-- Route Setup -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-flag"></i> Route Configuration</h3>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="startLocation">Starting Location <span class="required">*</span></label>
+              <input type="text" id="startLocation" placeholder="e.g. Erode" />
+              <span class="field-error" id="err-startLocation"></span>
+            </div>
+            <div class="form-group">
+              <label for="endLocation">Return Location</label>
+              <input type="text" id="endLocation" placeholder="e.g. Erode (same as start)" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveRouteConfig">
+            <i class="fas fa-save"></i> Save Route Config
+          </button>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           AI PLACE SUGGESTION AGENT
+           ============================================== -->
+      <div class="card mt-16 ai-agent-main-card">
+        <div class="card-header ai-header-main" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1d4ed8 100%); color:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:40px; height:40px; background:linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#fff;">
+              <i class="fas fa-brain"></i>
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; background:rgba(255,255,255,0.2); color:#93c5fd; padding:2px 8px; border-radius:99px;"><i class="fas fa-robot"></i> AI Suggest Places Agent</span>
+                <span style="font-size:0.72rem; color:#86efac; font-weight:600;"><i class="fas fa-circle" style="font-size:8px;"></i> Smart Assistant</span>
+              </div>
+              <h3 style="margin-top:2px; font-size:1.1rem; color:#fff;"><i class="fas fa-wand-magic-sparkles"></i> AI Place &amp; IV Spot Suggestions</h3>
+            </div>
+          </div>
+          <span style="font-size:0.78rem; background:rgba(255,255,255,0.15); padding:4px 10px; border-radius:99px; color:#dbeafe;">
+            <i class="fas fa-bolt" style="color:#fde047;"></i> Pre-built Smart IV Database
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="ai-search-row" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <div style="flex:1; min-width:240px; position:relative;">
+              <input type="text" id="mainAiCityInput" placeholder="Type destination city (e.g. Kochi, Bengaluru, Chennai, Coimbatore)..." style="width:100%; padding:10px 14px 10px 38px; border:1.5px solid #93c5fd; border-radius:8px; font-size:0.92rem;" />
+              <i class="fas fa-magnifying-glass-location" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#2563eb;"></i>
+            </div>
+            <button type="button" class="btn btn-primary" id="mainAiSearchBtn" style="padding:10px 18px; border-radius:8px;">
+              <i class="fas fa-wand-magic-sparkles"></i> Suggest Places
+            </button>
+          </div>
+
+          <!-- Quick City Chips -->
+          <div style="margin-top:14px;">
+            <span style="font-size:0.8rem; font-weight:700; color:#475569; display:inline-block; margin-bottom:8px;">
+              <i class="fas fa-bolt" style="color:#f59e0b;"></i> Quick Select IV Destination:
+            </span>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;" id="mainCityChipsList">
+              <button type="button" class="city-chip-btn active" data-city="Kochi">Kochi</button>
+              <button type="button" class="city-chip-btn" data-city="Chennai">Chennai</button>
+              <button type="button" class="city-chip-btn" data-city="Bengaluru">Bengaluru</button>
+              <button type="button" class="city-chip-btn" data-city="Coimbatore">Coimbatore</button>
+              <button type="button" class="city-chip-btn" data-city="Hyderabad">Hyderabad</button>
+              <button type="button" class="city-chip-btn" data-city="Pune">Pune</button>
+              <button type="button" class="city-chip-btn" data-city="Mumbai">Mumbai</button>
+              <button type="button" class="city-chip-btn" data-city="Mysore">Mysore</button>
+              <button type="button" class="city-chip-btn" data-city="Madurai">Madurai</button>
+              <button type="button" class="city-chip-btn" data-city="Delhi">Delhi</button>
+            </div>
+          </div>
+
+          <!-- Filter Category Tabs -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:1px solid #e2e8f0; flex-wrap:wrap; gap:8px;">
+            <div style="font-size:0.88rem; color:#334155;">
+              <i class="fas fa-map-pin" style="color:#2563eb;"></i> Suggestions for <strong id="mainAiCityName">Kochi</strong>
+            </div>
+            <div style="display:flex; gap:6px;" id="mainAiCatTabs">
+              <button type="button" class="cat-pill active" data-filter="all">All</button>
+              <button type="button" class="cat-pill" data-filter="company"><i class="fas fa-industry"></i> Company Visits</button>
+              <button type="button" class="cat-pill" data-filter="tourist"><i class="fas fa-camera"></i> Tourist Places</button>
+            </div>
+          </div>
+
+          <!-- Suggestion Cards Container -->
+          <div id="mainAiSuggestionsList" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:14px; margin-top:14px;"></div>
+        </div>
+      </div>
+
+      <!-- Add Place Form -->
+      <div class="card mt-16">
+        <div class="card-header">
+          <h3 id="place-form-title"><i class="fas fa-map-pin"></i> Add Place / Stop</h3>
+        </div>
+        <div class="card-body">
+          <form id="placeForm" novalidate>
+            <input type="hidden" id="placeEditId" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="placeName">Place / Company Name <span class="required">*</span></label>
+                <input type="text" id="placeName" placeholder="e.g. TCS Kochi / Marine Drive" maxlength="80" />
+                <span class="field-error" id="err-placeName"></span>
+              </div>
+              <div class="form-group">
+                <label for="placeType">Type <span class="required">*</span></label>
+                <select id="placeType">
+                  <option value="">-- Select Type --</option>
+                  <option value="destination">Destination City</option>
+                  <option value="company">Company Visit</option>
+                  <option value="tourist">Tourist Place</option>
+                  <option value="other">Other</option>
+                </select>
+                <span class="field-error" id="err-placeType"></span>
+              </div>
+              <div class="form-group">
+                <label for="placeDistance">Distance from Previous (km)</label>
+                <input type="number" id="placeDistance" placeholder="e.g. 250" min="0" />
+              </div>
+              <div class="form-group">
+                <label for="placeTime">Estimated Travel Time</label>
+                <input type="text" id="placeTime" placeholder="e.g. 5 hrs" maxlength="30" />
+              </div>
+              <div class="form-group full-width">
+                <label for="placeNotes">Notes</label>
+                <input type="text" id="placeNotes" placeholder="e.g. Bring ID card, entry is free" maxlength="150" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="placeSubmitBtn">
+                <i class="fas fa-plus"></i> Add Place
+              </button>
+              <button type="button" class="btn btn-secondary" id="placeCancelBtn" style="display:none;">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Route Display -->
+      <div class="card mt-16">
+        <div class="card-header">
+          <h3><i class="fas fa-route"></i> Complete Route</h3>
+        </div>
+        <div class="card-body">
+          <div id="routeDisplay">
+            <p class="empty-msg">No places added yet. Add places above to build your route.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Places Table -->
+      <div class="card mt-16">
+        <div class="card-header flex-between">
+          <h3><i class="fas fa-list"></i> Places List &nbsp;<span class="badge" id="placesCount">0</span></h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Place / Company</th>
+                  <th>Type</th>
+                  <th>Distance</th>
+                  <th>Travel Time</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="placesTableBody">
+                <tr><td colspan="8" class="empty-row">No places added yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TRANSPORT & HOTEL PAGE ===================== -->
+    <section class="page" id="page-transport">
+      <div class="section-header">
+        <h2><i class="fas fa-bus"></i> Transport &amp; Hotel</h2>
+        <p>Manage transport and accommodation details for the IV.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="transportTab">
+          <i class="fas fa-bus"></i> Transport
+        </button>
+        <button class="tab-btn" data-tab="hotelTab">
+          <i class="fas fa-hotel"></i> Hotel
+        </button>
+      </div>
+
+      <!-- TRANSPORT TAB -->
+      <div class="tab-content active" id="transportTab">
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3 id="transport-form-title"><i class="fas fa-bus-alt"></i> Transport Details</h3>
+          </div>
+          <div class="card-body">
+            <form id="transportForm" novalidate>
+              <input type="hidden" id="transportEditId" />
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="transportType">Transport Type <span class="required">*</span></label>
+                  <select id="transportType">
+                    <option value="">-- Select Type --</option>
+                    <option>Bus</option>
+                    <option>Train</option>
+                    <option>Van</option>
+                    <option>Car Pool</option>
+                    <option>Other</option>
+                  </select>
+                  <span class="field-error" id="err-transportType"></span>
+                </div>
+                <div class="form-group">
+                  <label for="vehicleDetails">Vehicle / Train Details <span class="required">*</span></label>
+                  <input type="text" id="vehicleDetails" placeholder="e.g. TNSTC Bus KA1234 / Cheran Express" maxlength="80" />
+                  <span class="field-error" id="err-vehicleDetails"></span>
+                </div>
+                <div class="form-group">
+                  <label for="departureLocation">Departure Location <span class="required">*</span></label>
+                  <input type="text" id="departureLocation" placeholder="e.g. Erode Bus Stand" maxlength="80" />
+                  <span class="field-error" id="err-departureLocation"></span>
+                </div>
+                <div class="form-group">
+                  <label for="departureTime">Departure Time <span class="required">*</span></label>
+                  <input type="datetime-local" id="departureTime" />
+                  <span class="field-error" id="err-departureTime"></span>
+                </div>
+                <div class="form-group">
+                  <label for="arrivalLocation">Arrival Location <span class="required">*</span></label>
+                  <input type="text" id="arrivalLocation" placeholder="e.g. Kochi" maxlength="80" />
+                  <span class="field-error" id="err-arrivalLocation"></span>
+                </div>
+                <div class="form-group">
+                  <label for="arrivalTime">Arrival Time</label>
+                  <input type="datetime-local" id="arrivalTime" />
+                </div>
+                <div class="form-group">
+                  <label for="transportCost">Transport Cost (₹) <span class="required">*</span></label>
+                  <input type="number" id="transportCost" placeholder="e.g. 15000" min="0" />
+                  <span class="field-error" id="err-transportCost"></span>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="transportSubmitBtn">
+                  <i class="fas fa-plus"></i> Add Transport
+                </button>
+                <button type="button" class="btn btn-secondary" id="transportCancelBtn" style="display:none;">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Transport List -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3><i class="fas fa-list"></i> Transport List</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>Vehicle Details</th>
+                    <th>From</th>
+                    <th>Departure</th>
+                    <th>To</th>
+                    <th>Arrival</th>
+                    <th>Cost (₹)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="transportTableBody">
+                  <tr><td colspan="9" class="empty-row">No transport details added yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOTEL TAB -->
+      <div class="tab-content" id="hotelTab">
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3 id="hotel-form-title"><i class="fas fa-hotel"></i> Hotel Details</h3>
+          </div>
+          <div class="card-body">
+            <form id="hotelForm" novalidate>
+              <input type="hidden" id="hotelEditId" />
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="hotelName">Hotel Name <span class="required">*</span></label>
+                  <input type="text" id="hotelName" placeholder="e.g. Hotel Grand Kochi" maxlength="80" />
+                  <span class="field-error" id="err-hotelName"></span>
+                </div>
+                <div class="form-group">
+                  <label for="hotelLocation">Hotel Location <span class="required">*</span></label>
+                  <input type="text" id="hotelLocation" placeholder="e.g. MG Road, Kochi" maxlength="100" />
+                  <span class="field-error" id="err-hotelLocation"></span>
+                </div>
+                <div class="form-group">
+                  <label for="checkIn">Check-in Date <span class="required">*</span></label>
+                  <input type="date" id="checkIn" />
+                  <span class="field-error" id="err-checkIn"></span>
+                </div>
+                <div class="form-group">
+                  <label for="checkOut">Check-out Date <span class="required">*</span></label>
+                  <input type="date" id="checkOut" />
+                  <span class="field-error" id="err-checkOut"></span>
+                </div>
+                <div class="form-group">
+                  <label for="numRooms">Number of Rooms <span class="required">*</span></label>
+                  <input type="number" id="numRooms" placeholder="e.g. 10" min="1" />
+                  <span class="field-error" id="err-numRooms"></span>
+                </div>
+                <div class="form-group">
+                  <label for="studentsPerRoom">Students Per Room</label>
+                  <input type="number" id="studentsPerRoom" placeholder="e.g. 3" min="1" />
+                </div>
+                <div class="form-group">
+                  <label for="hotelCost">Total Hotel Cost (₹) <span class="required">*</span></label>
+                  <input type="number" id="hotelCost" placeholder="e.g. 25000" min="0" />
+                  <span class="field-error" id="err-hotelCost"></span>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="hotelSubmitBtn">
+                  <i class="fas fa-plus"></i> Add Hotel
+                </button>
+                <button type="button" class="btn btn-secondary" id="hotelCancelBtn" style="display:none;">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Hotel List -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3><i class="fas fa-list"></i> Hotel List</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Hotel Name</th>
+                    <th>Location</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Rooms</th>
+                    <th>Per Room</th>
+                    <th>Cost (₹)</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="hotelTableBody">
+                  <tr><td colspan="9" class="empty-row">No hotel details added yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BUDGET & SCHEDULE PAGE ===================== -->
+    <section class="page" id="page-budget">
+      <div class="section-header">
+        <h2><i class="fas fa-wallet"></i> Budget &amp; Schedule</h2>
+        <p>Track all expenses and plan the day-by-day schedule.</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="budgetTab">
+          <i class="fas fa-rupee-sign"></i> Budget
+        </button>
+        <button class="tab-btn" data-tab="scheduleTab">
+          <i class="fas fa-calendar-alt"></i> Schedule
+        </button>
+      </div>
+
+      <!-- BUDGET TAB -->
+      <div class="tab-content active" id="budgetTab">
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3><i class="fas fa-calculator"></i> Budget Breakdown</h3>
+          </div>
+          <div class="card-body">
+            <form id="budgetForm" novalidate>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="budgetTransport">Transport Cost (₹)</label>
+                  <input type="number" id="budgetTransport" placeholder="Auto-filled from Transport module" min="0" readonly class="readonly-input" />
+                </div>
+                <div class="form-group">
+                  <label for="budgetHotel">Hotel Cost (₹)</label>
+                  <input type="number" id="budgetHotel" placeholder="Auto-filled from Hotel module" min="0" readonly class="readonly-input" />
+                </div>
+                <div class="form-group">
+                  <label for="budgetFood">Food Cost (₹) <span class="required">*</span></label>
+                  <input type="number" id="budgetFood" placeholder="e.g. 8000" min="0" />
+                  <span class="field-error" id="err-budgetFood"></span>
+                </div>
+                <div class="form-group">
+                  <label for="budgetEntry">Entry / Visit Cost (₹)</label>
+                  <input type="number" id="budgetEntry" placeholder="e.g. 2000" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="budgetOther">Other Expenses (₹)</label>
+                  <input type="number" id="budgetOther" placeholder="e.g. 1000" min="0" />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="budgetSubmitBtn">
+                  <i class="fas fa-calculator"></i> Calculate Budget
+                </button>
+              </div>
+            </form>
+
+            <!-- Budget Result -->
+            <div class="budget-result" id="budgetResult" style="display:none;">
+              <div class="budget-row">
+                <span>Transport Cost</span><span id="res-transport">₹0</span>
+              </div>
+              <div class="budget-row">
+                <span>Hotel Cost</span><span id="res-hotel">₹0</span>
+              </div>
+              <div class="budget-row">
+                <span>Food Cost</span><span id="res-food">₹0</span>
+              </div>
+              <div class="budget-row">
+                <span>Entry / Visit Cost</span><span id="res-entry">₹0</span>
+              </div>
+              <div class="budget-row">
+                <span>Other Expenses</span><span id="res-other">₹0</span>
+              </div>
+              <div class="budget-row total">
+                <span>Total IV Budget</span><span id="res-total">₹0</span>
+              </div>
+              <div class="budget-row highlight">
+                <span>Cost Per Student (<span id="res-student-count">0</span> students)</span>
+                <span id="res-per-student">₹0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE TAB -->
+      <div class="tab-content" id="scheduleTab">
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3 id="schedule-form-title"><i class="fas fa-plus-circle"></i> Add Schedule Entry</h3>
+          </div>
+          <div class="card-body">
+            <form id="scheduleForm" novalidate>
+              <input type="hidden" id="scheduleEditId" />
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="scheduleDay">Day <span class="required">*</span></label>
+                  <input type="text" id="scheduleDay" placeholder="e.g. Day 1" maxlength="20" />
+                  <span class="field-error" id="err-scheduleDay"></span>
+                </div>
+                <div class="form-group">
+                  <label for="scheduleDate">Date <span class="required">*</span></label>
+                  <input type="date" id="scheduleDate" />
+                  <span class="field-error" id="err-scheduleDate"></span>
+                </div>
+                <div class="form-group">
+                  <label for="scheduleTime">Time <span class="required">*</span></label>
+                  <input type="time" id="scheduleTime" />
+                  <span class="field-error" id="err-scheduleTime"></span>
+                </div>
+                <div class="form-group">
+                  <label for="scheduleActivity">Activity <span class="required">*</span></label>
+                  <input type="text" id="scheduleActivity" placeholder="e.g. Start Journey" maxlength="80" />
+                  <span class="field-error" id="err-scheduleActivity"></span>
+                </div>
+                <div class="form-group">
+                  <label for="scheduleLocation">Location <span class="required">*</span></label>
+                  <input type="text" id="scheduleLocation" placeholder="e.g. Erode Bus Stand" maxlength="80" />
+                  <span class="field-error" id="err-scheduleLocation"></span>
+                </div>
+                <div class="form-group">
+                  <label for="scheduleDuration">Duration</label>
+                  <input type="text" id="scheduleDuration" placeholder="e.g. 2 hrs / All day" maxlength="30" />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="scheduleSubmitBtn">
+                  <i class="fas fa-plus"></i> Add Schedule Entry
+                </button>
+                <button type="button" class="btn btn-secondary" id="scheduleCancelBtn" style="display:none;">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Schedule List -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <h3><i class="fas fa-calendar-check"></i> IV Schedule</h3>
+          </div>
+          <div class="card-body">
+            <div id="scheduleDisplay">
+              <p class="empty-msg">No schedule entries added yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <script src="app.js"></script>
+
+  <!-- ========== NAME LIST BULK IMPORT MODAL ========== -->
+  <div class="modal-overlay" id="nameListImportModal" style="display:none;">
+    <div class="modal-box modal-lg" style="max-width:750px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:42px; height:42px; border-radius:12px; background:#dbeafe; color:#1d4ed8; display:flex; align-items:center; justify-content:center; font-size:20px;">
+            <i class="fas fa-users-rectangle"></i>
+          </div>
+          <div>
+            <h3 id="nameListModalTitle">Extracted Student Names Preview</h3>
+            <p style="font-size:0.82rem; color:#64748b;" id="nameListModalSubtitle">Review and edit extracted student names from PDF before saving to the Student List</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" id="nameListModalCloseBtn">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding:20px 24px;">
+        <div style="margin-bottom:14px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:14px; font-size:0.88rem; color:#166534; display:flex; gap:10px; align-items:flex-start;">
+          <i class="fas fa-circle-check" style="font-size:18px; margin-top:2px; color:#16a34a;"></i>
+          <div>
+            <strong>Smart Name List Extraction:</strong>
+            <p style="margin-top:2px; font-size:0.82rem; color:#15803d;">Every student name inside the uploaded PDF has been extracted. You can review or edit any name below before confirming.</p>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap;">
+          <label for="nameListFileInput" class="btn btn-primary btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:8px;">
+            <i class="fas fa-file-arrow-up"></i> Choose Name List File (PDF / TXT / CSV)
+          </label>
+          <input type="file" id="nameListFileInput" accept=".pdf,.txt,.csv" style="display:none;" />
+          <span id="nameListFileStatus" style="font-size:0.84rem; color:#475569; font-weight:600;"><i class="fas fa-file-lines"></i> Ready for upload</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:14px; margin-bottom:14px;">
+          <div class="form-group">
+            <label style="font-size:0.82rem; font-weight:700; color:#334155;">Department for this Batch:</label>
+            <select id="nameListDefaultDept" style="padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.88rem;">
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Electronics &amp; Communication">Electronics &amp; Communication</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Business Administration">Business Administration</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-size:0.82rem; font-weight:700; color:#334155;">Year of Study:</label>
+            <select id="nameListDefaultYear" style="padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.88rem;">
+              <option value="3rd Year">3rd Year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-size:0.84rem; font-weight:700; color:#1e293b;">
+              Student Names Extracted from File:
+            </label>
+            <span id="nameListCountBadge" style="background:#dbeafe; color:#1d4ed8; font-weight:700; font-size:0.78rem; padding:3px 10px; border-radius:99px;">0 students found in this PDF.</span>
+          </div>
+          <textarea id="nameListTextarea" rows="8" placeholder="Extracted names will appear here automatically, e.g.:&#10;Aravind Kumar&#10;Divya Bharathi&#10;Karthik Raja&#10;Priya Dharshini&#10;Suresh Raina&#10;Vignesh S&#10;Meena K" style="width:100%; padding:12px; border:1.5px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.92rem; line-height:1.5; color:#1e293b; background:#ffffff;"></textarea>
+          <span style="font-size:0.75rem; color:#64748b; margin-top:4px;">You can also paste or edit student names directly (one name per line). Serial numbers like 1., 2. are automatically stripped.</span>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding:14px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <button type="button" class="btn btn-outline btn-sm" id="btnLoadSampleNames">
+          <i class="fas fa-wand-magic-sparkles"></i> Load Sample IV Students Name List
+        </button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" class="btn btn-secondary" id="nameListModalCancelBtn">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmImportNames">
+            <i class="fas fa-check-circle"></i> <span id="btnImportNamesLabel">Confirm &amp; Save</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
